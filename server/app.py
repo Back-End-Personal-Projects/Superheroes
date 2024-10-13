@@ -21,6 +21,7 @@ def index():
     return "Welcome to the Superheroes API!"
 
 #Building the API
+#Heroes
 # Get all heroes
 @app.route('/heroes', methods=['GET'])
 def heroes():
@@ -43,6 +44,19 @@ def heroes_by_id(id):
     response = make_response(Hero_dict,200)
 
     return response
+
+#Update hero
+@app.route('/heroes/<int:id>', methods=['PUT'])
+def update_hero(id):
+    hero = Hero.query.get(id)
+    if not hero:
+        return jsonify({"error": "Hero not found"}), 404
+
+    data = request.get_json()
+    hero.name = data.get('name', hero.name)
+    hero.super_name = data.get('super_name', hero.super_name)
+    db.session.commit()
+    return jsonify(hero.to_dict()), 200
 
 #Powers
 @app.route('/powers', methods=['GET', 'POST'])
@@ -134,19 +148,6 @@ def create_hero_power():
     db.session.add(new_hero_power)
     db.session.commit()
     return jsonify(new_hero_power.to_dict()), 201
-
-#Update hero
-@app.route('/heroes/<int:id>', methods=['PUT'])
-def update_hero(id):
-    hero = Hero.query.get(id)
-    if not hero:
-        return jsonify({"error": "Hero not found"}), 404
-
-    data = request.get_json()
-    hero.name = data.get('name', hero.name)
-    hero.super_name = data.get('super_name', hero.super_name)
-    db.session.commit()
-    return jsonify(hero.to_dict()), 200
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
