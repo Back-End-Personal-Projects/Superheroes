@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Table
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from db import db
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -26,5 +26,8 @@ class Hero(db.Model, SerializerMixin):
             "id": self.id,
             "name": self.name,
             "super_name": self.super_name,
-            "powers": [power.to_dict() for power in self.powers]  # Ensure this line is correct
+            "powers": [power.to_dict() for power in self.powers if power is not None] 
         }
+
+def __repr__(self):
+        return f"<Hero (id={self.id}, name={self.name}, super_name={self.super_name})>"

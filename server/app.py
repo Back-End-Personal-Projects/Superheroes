@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 from models.hero import Hero
 from models.power import Power
 from models.hero_power import HeroPower
+from flask import jsonify
 from db import db
 
 # Create Flask app
@@ -28,7 +29,7 @@ def heroes():
         hero_dict = hero.to_dict()
         heroes.append(hero_dict)
 
-    response = make_response(heroes,200)
+    response = jsonify(heroes),200
 
     return response
 
@@ -50,15 +51,15 @@ def powers():
         powers = []
         for power in Power.query.all():
             power_dict = power.to_dict()
-            power.append(power_dict)
+            powers.append(power_dict)
 
-        response = make_response(powers,200)
+        response = jsonify(powers),200
 
         return response
 
     elif request.method == 'POST':
         new_power = Power(
-            power_id=power.form.get("id"),
+            power_id=request.form.get("id"),
             name=request.form.get("name"),
             description=request.form.get("description"),
             

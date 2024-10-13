@@ -15,8 +15,7 @@ class Power(db.Model, SerializerMixin):
     description = db.Column(db.String, nullable=False)
    
     #Relationship mapping powers to heropowers 
-    heropowers = db.relationship(
-        'HeroPower', back_populates="power", cascade='all, delete-orphan')
+    heropowers = db.relationship('HeroPower', back_populates="power", cascade='all, delete-orphan')
 
     # Association proxy to get hero for this power through hero_power
     heroes = association_proxy('heropowers', 'hero')
@@ -34,3 +33,5 @@ class Power(db.Model, SerializerMixin):
             "name": self.name,
             "description": self.description
         }
+    def __repr__(self):
+        return f"<Power (id={self.id}, name={self.name}, description={self.description})>"
