@@ -18,10 +18,10 @@ class HeroPower(db.Model, SerializerMixin):
     power_id = db.Column(db.Integer, ForeignKey('powers.id', ondelete='CASCADE'), nullable=False)
 
     #Relationship mapping to related hero
-    hero = relationship('Hero', back_populates='heropowers')
+    hero = relationship('Hero', back_populates='hero_powers')
    
     #Relationship mapping to related power
-    power = relationship('Power', back_populates='heropowers')
+    power = relationship('Power', back_populates='hero_powers')
 
  # Validation
     @validates('strength')

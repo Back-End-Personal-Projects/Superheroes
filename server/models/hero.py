@@ -11,15 +11,15 @@ class Hero(db.Model, SerializerMixin):
 
     serialize_rules = ('-heropowers.hero',)
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    super_name = Column(String, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    super_name = db.Column(String, nullable=False)
     
     # Relationship mapping hero to powers
-    heropowers = relationship('HeroPower', back_populates='hero', cascade='all, delete-orphan')
+    hero_powers = relationship('HeroPower', back_populates='hero', cascade='all, delete-orphan')
 
     # Association proxy to get powers through hero_power
-    powers = association_proxy('heropowers', 'power')
+    powers = association_proxy('hero_powers', 'power')
 
     def to_dict(self):
         return {
@@ -30,4 +30,4 @@ class Hero(db.Model, SerializerMixin):
         }
 
 def __repr__(self):
-        return f"<Hero (id={self.id}, name={self.name}, super_name={self.super_name})>"
+    return f"<Hero (id={self.id}, name={self.name}, super_name={self.super_name})>"

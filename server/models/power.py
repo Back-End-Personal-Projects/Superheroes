@@ -15,10 +15,10 @@ class Power(db.Model, SerializerMixin):
     description = db.Column(db.String, nullable=False)
    
     #Relationship mapping powers to heropowers 
-    heropowers = db.relationship('HeroPower', back_populates="power", cascade='all, delete-orphan')
+    hero_powers = db.relationship('HeroPower', back_populates="power", cascade='all, delete-orphan')
 
     # Association proxy to get hero for this power through hero_power
-    heroes = association_proxy('heropowers', 'hero')
+    heroes = association_proxy('hero_powers', 'hero')
 
     #Validation
     @validates('description')

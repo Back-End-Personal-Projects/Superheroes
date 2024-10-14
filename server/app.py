@@ -39,11 +39,32 @@ def heroes():
 def heroes_by_id(id):
     hero = Hero.query.filter(Hero.id == id).first()
 
+    if not hero:
+        return jsonify({"error": "Hero not found"}), 404
+
     Hero_dict = hero.to_dict()
 
     response = make_response(Hero_dict,200)
 
     return response
+
+#Create new hero
+@app.route('/heroes', methods=['POST'])
+def create_episode():
+    data = request.get_json()
+
+    if not all(key in data for key in ('name', 'super_name')):
+        return jsonify({"error": "Missing required fields: name, super_name"}), 400
+
+    new_hero = Hero(
+        name=data['name'],
+        super_name=data['super_name']
+    )
+    
+    db.session.add(new_hero)
+    db.session.commit()
+
+    return jsonify(new_hero.to_dict()), 201
 
 #Update hero
 @app.route('/heroes/<int:id>', methods=['PUT'])
@@ -58,88 +79,139 @@ def update_hero(id):
     db.session.commit()
     return jsonify(hero.to_dict()), 200
 
+# Update hero (PATCH)
+@app.route('/heroes/<int:id>', methods=['PATCH'])
+def patch_heroes(id):
+    hero = Hero.query.get_or_404(id)  
+
+    data = request.get_json()  
+
+    if 'name' in data:
+        hero.name = data['name']
+    if 'super_name' in data:
+        hero.super_name = data['super_name']
+
+    db.session.commit()  
+    return jsonify(hero.to_dict()), 200 
+
+# Delete a hero
+@app.route('/heroes/<int:id>', methods=['DELETE'])
+def delete_hero(id):
+    hero = Hero.query.get_or_404(id)  
+
+    db.session.delete(hero)  
+    db.session.commit()  
+
+    return jsonify({"message": "Hero deleted successfully."}), 200 
+
+
 #Powers
-@app.route('/powers', methods=['GET', 'POST'])
-def powers():
-    if request.method == 'GET':
-        powers = []
-        for power in Power.query.all():
-            power_dict = power.to_dict()
-            powers.append(power_dict)
+# Get all powers
+@app.route('/powers', methods=['GET'])
+def get_powers():
+    powers = []
+    for power in Power.query.all():
+        power_dict = power.to_dict()
+        powers.append(power_dict)
 
-        response = jsonify(powers),200
+    response = jsonify(powers),200
 
-        return response
+    return response
 
-    elif request.method == 'POST':
-        new_power = Power(
-            power_id=request.form.get("id"),
-            name=request.form.get("name"),
-            description=request.form.get("description"),
-            
-        )
-
-        db.session.add(new_power)
-        db.session.commit()
-
-        power_dict = new_power.to_dict()
-
-        response = make_response(power_dict,201)
-
-        return response
-    
-#Get, Update, Delete power by id
-@app.route('/powers/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
-def get_power_by_id(id):
+#Get power by ID
+@app.route('/powers/<int:id>', methods=['GET'])
+def powers_by_id(id):
     power = Power.query.filter(Power.id == id).first()
     
-    if power == None:
-        response_body = {
-            "message": "This record does not exist in our database. Please try again."
-        }
-        response = make_response(response_body, 404)
+    if not power:
+        return jsonify({"error": "Power not found"}), 404
+    
+    Power_dict = power.to_dict()
 
-        return response
+    response = make_response(Power_dict,200)
 
-    else:
-        if request.method == 'GET':
-            power_dict = power.to_dict()
+    return response
 
-            response = make_response(power_dict,200)
+#Create new power
+@app.route('/powers', methods=['POST'])
+def create_power():
+    data = request.get_json()
+    new_power = Power(
+        name=data['name'],
+        description=data['description']
+    )
+    
+    db.session.add(new_power)
+    db.session.commit()
 
-            return response
+    return jsonify(new_power.to_dict()), 201
 
-        elif request.method == 'PATCH':
-            for attr in request.form:
-                setattr(power, attr, request.form.get(attr))
+#Update powers
+@app.route('/powers/<int:id>', methods=['PUT'])
+def update_power(id):
+    power = Power.query.get(id)
+    if not power:
+        return jsonify({"error": "Power not found"}), 404
 
-            db.session.add(power)
-            db.session.commit()
+    data = request.get_json()
+    power.name = data.get('name', power.name)
+    power.description = data.get('description', power.description)
+    db.session.commit()
+    return jsonify(power.to_dict()), 200
 
-            power_dict = power.to_dict()
+# Update powers (PATCH)
+@app.route('/powers/<int:id>', methods=['PATCH'])
+def patch_power(id):
+    power = Power.query.get_or_404(id)  
 
-            response = make_response(
-                power_dict,200)
+    data = request.get_json()  
 
-            return response
+    if 'name' in data:
+        power.name = data['name']
+    if 'description' in data:
+        power.description = data['description']
 
-        elif request.method == 'DELETE':
-            db.session.delete(power)
-            db.session.commit()
+    db.session.commit()  
+    return jsonify(power.to_dict()), 200 
 
-            response_body = {
-                "delete_successful": True,
-                "message": "Power deleted."
-            }
+# Delete a power
+@app.route('/powers/<int:id>', methods=['DELETE'])
+def delete_power(id):
+    power = Power.query.get_or_404(id)  
 
-            response = make_response(response_body,200)
+    db.session.delete(power)  
+    db.session.commit()  
 
-            return response
+    return jsonify({"message": "Power deleted successfully."}), 200
+#HeroPowers
+# Get all Heropowers
+@app.route('/hero_powers', methods=['GET'])
+def get_hero_powers():
+    hero_powers = [hero_power.to_dict() for hero_power in HeroPower.query.all()]
+    return jsonify(hero_powers), 200
 
-#Create hero power
+#Get heropowers by ID
+@app.route('/hero_powers/<int:id>', methods=['GET'])
+def hero_powers_by_id(id):
+    hero_power = HeroPower.query.filter(HeroPower.id == id).first()
+    
+    if not hero_power:
+        return jsonify({"error": "Heropower not found"}), 404
+   
+    hero_power_dict = hero_power.to_dict()
+
+    response = make_response(hero_power_dict,200)
+
+    return response
+
+#Create hero_power
 @app.route('/hero_powers', methods=['POST'])
 def create_hero_power():
     data = request.get_json()
+
+    if not all(key in data for key in ('strength', 'hero_id', 'power_id')):
+        return jsonify({"error": "Missing required fields: strength, hero_id, power_id"}), 400
+    
     new_hero_power = HeroPower(
         strength=data['strength'],
         hero_id=data['hero_id'],
@@ -148,6 +220,54 @@ def create_hero_power():
     db.session.add(new_hero_power)
     db.session.commit()
     return jsonify(new_hero_power.to_dict()), 201
+
+#Update hero_power(PUT)
+@app.route('/hero_powers/<int:id>', methods=['PUT'])
+def update_hero_power(id):
+    hero_power = HeroPower.query.get(id)
+
+    if not hero_power:
+        return jsonify({"error": "Hero power not found"}), 404
+   
+    data = request.get_json()
+    
+    hero_power.hero_id = data.get('hero_id', hero_power.hero_id)
+    hero_power.power_id = data.get('power_id', hero_power.power_id)
+    
+    db.session.commit()
+    return jsonify(hero_power.to_dict()), 200
+
+# Update appearance (PATCH)
+@app.route('/hero_powers/<int:id>', methods=['PATCH'])
+def patch_hero_power(id):
+    hero_power = HeroPower.query.get_or_404(id)  
+
+    data = request.get_json()  
+
+    if 'strength' in data:
+        try:
+            hero_power.strength = hero_power.validate_strength(data['strength'])
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+        
+    if 'hero_id' in data:
+        hero_power.hero_id = data['hero_id']
+    if 'power_id' in data:
+        hero_power.power_id = data['power_id']
+
+    db.session.commit()  
+    return jsonify(hero_power.to_dict()), 200 
+
+# Delete a hero_power
+@app.route('/hero_powers/<int:id>', methods=['DELETE'])
+def delete_hero_power(id):
+    hero_power = HeroPower.query.get_or_404(id)  
+
+    db.session.delete(hero_power)  
+    db.session.commit()  
+
+    return jsonify({"message": "Hero_power deleted successfully."}), 200  
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
