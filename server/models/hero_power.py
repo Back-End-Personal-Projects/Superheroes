@@ -34,12 +34,26 @@ class HeroPower(db.Model, SerializerMixin):
     def to_dict(self):
         return {
             "id": self.id,
-            "strength": self.strength,
             "hero_id": self.hero_id,
             "power_id": self.power_id,
-            "hero": self.hero.to_dict() if self.hero else None,
-            "power": self.power.to_dict() if self.power else None
+            "strength": self.strength,
+            "hero": {
+                "id": self.hero.id,
+                "name": self.hero.name,
+                "super_name": self.hero.super_name
+            } if self.hero else None,
+            "power": {
+                "id": self.power.id,
+                "name": self.power.name,
+                "description": self.power.description
+            } if self.power else None
         }
 
     def __repr__(self):
-        return f"<HeroPower (id={self.id},strength={self.strength},hero_id={self.hero_id},power_id={self.power_id})>"
+        return (f"<HeroPower (id={self.id}, "
+                f"strength={self.strength}, "
+                f"hero_id={self.hero_id}, "
+                f"power_id={self.power_id}, "
+                f"hero_name={self.hero.name if self.hero else 'None'}, "
+                f"power_name={self.power.name if self.power else 'None'})>")
+    

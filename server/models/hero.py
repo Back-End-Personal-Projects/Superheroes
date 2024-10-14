@@ -26,8 +26,22 @@ class Hero(db.Model, SerializerMixin):
             "id": self.id,
             "name": self.name,
             "super_name": self.super_name,
-            "powers": [power.to_dict() for power in self.powers if power is not None] 
+            "hero_powers": [
+                {
+                    "hero_id": power.hero_id,
+                    "id": power.id,
+                    "power": {
+                        "description": power.power.description,
+                        "id": power.power.id,
+                        "name": power.power.name
+                    },
+                    "power_id": power.power_id,
+                    "strength": power.strength
+                }
+                for power in self.hero_powers
+            ]
         }
+
 
 def __repr__(self):
     return f"<Hero (id={self.id}, name={self.name}, super_name={self.super_name})>"

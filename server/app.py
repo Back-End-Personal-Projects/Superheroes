@@ -237,7 +237,7 @@ def update_hero_power(id):
     db.session.commit()
     return jsonify(hero_power.to_dict()), 200
 
-# Update appearance (PATCH)
+# Update hero_power (PATCH)
 @app.route('/hero_powers/<int:id>', methods=['PATCH'])
 def patch_hero_power(id):
     hero_power = HeroPower.query.get_or_404(id)  
@@ -245,11 +245,8 @@ def patch_hero_power(id):
     data = request.get_json()  
 
     if 'strength' in data:
-        try:
-            hero_power.strength = hero_power.validate_strength(data['strength'])
-        except ValueError as e:
-            return jsonify({"error": str(e)}), 400
-        
+        hero_power.strength = data['strength']  
+
     if 'hero_id' in data:
         hero_power.hero_id = data['hero_id']
     if 'power_id' in data:
