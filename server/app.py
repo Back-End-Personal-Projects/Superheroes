@@ -11,7 +11,7 @@ from db import db
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.json.compact = False
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -212,13 +212,27 @@ def create_hero_power():
     if not all(key in data for key in ('strength', 'hero_id', 'power_id')):
         return jsonify({"error": "Missing required fields: strength, hero_id, power_id"}), 400
     
+    # Check if hero_id and power_id exist
+    hero = Hero.query.get(data['hero_id'])
+    power = Power.query.get(data['power_id'])
+    if not hero:
+        return jsonify({"error": "Hero with this ID does not exist."}), 400
+    if not power:
+        return jsonify({"error": "Power with this ID does not exist."}), 400
+
     new_hero_power = HeroPower(
-        strength=data['strength'],
+
         hero_id=data['hero_id'],
-        power_id=data['power_id']
+        power_id=data['power_id'],
+        strength=data['strength']
     )
-    db.session.add(new_hero_power)
-    db.session.commit()
+
+    try:
+        db.session.add(new_hero_power)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
     return jsonify(new_hero_power.to_dict()), 201
 
 #Update hero_power(PUT)
