@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, make_response
-from flask_sqlalchemy import SQLAlchemy
+#from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from models.hero import Hero
 from models.power import Power
@@ -10,7 +10,7 @@ from db import db
 # Create Flask app
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 db.init_app(app)
